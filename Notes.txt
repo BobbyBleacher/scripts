@@ -1,0 +1,291 @@
+Notes:
+
+Black (5) and Red (2) connects to W/B (7, Low) and B (8, High)
+Green (5, High) and White (2, Low) connects to G (6, High) and W/G (3, Low)
+
+To connect to Panda;/OBD
+Black (H/6) and Red (L/14)
+Which means the Green (H/12) and White (L/13) need to be connected to the Panda on 12/13
+-----------
+cd /data/openpilot/selfdrive && PYTHONPATH=/data/openpilot PREPAREONLY=1 /data/openpilot/selfdrive/controls/controlsd.py
+--------------
+Edit gateway config
+cp /var/etc/gateway.cfg ~/internal.dat.new
+nano ~/internal.dat.new
+sendgwconfig.sh
+/bin/bash /home/wk057/updater-console
+service-redeploy
+--------------
+# Go into developer mode manually
+/usr/local/bin/sdv GUI_developerMode true
+--------------
+# Turns on developer mode script
+/bin/bash /home/wk057/users_addon.sh &
+
+Edit shortcuts:
+nano /home/wk057/change_body.sh
+nano /home/wk057/users_addon.sh
+--------------
+Hey to enable Spotify and Slacker, just make your /home/tesla/.Tesla/car/settings.conf file look like this:
+[maps]
+viewporturl=
+
+[spotify]
+enable=1
+
+[slacker]
+enable=1
+--------------
+Fix EON after flip
+
+LD_LIBRARY_PATH="" content insert --uri content://settings/system --bind name:s:user_rotation --bind value:i:1
+------------------
+Fix EON not updating
+
+curl -o /tmp/updater https://neos.comma.ai/updater && chmod +x /tmp/updater && /tmp/updater
+
+------------------
+Flash Panda
+cd /data/openpilot/panda/board
+make
+
+------------
+Update logs:
+grep cid-updater /var/log/syslog/current | grep ": gwmon"
+cat /var/log/sx-updater/current | grep ": gwmon"
+
+tail -F /var/log/sx-updater/current | grep ": gwmon"
+
+----------
+
+gwxfer gw:/hwids.txt /tmp/hwids.txt
+cat /tmp/hwids.txt
+nano /tmp/hwids.txt
+gwxfer /tmp/hwids.txt gw:/hwidacq.mov
+-----------
+socat - tcp:parrot:telnet
+iptables -t nat -D PREROUTING -i mlan0 -p tcp -m tcp --dport 229 -j DNAT --to-destination 192.168.20.2:22 
+iptables -t nat -I PREROUTING -i mlan0 -p tcp -m tcp --dport 229 -j DNAT --to-destination 192.168.20.2:22
+
+/sbin/iptables -D INPUT -i parrot -p tcp -m tcp --dport 22 -j ACCEPT
+/sbin/iptables -I INPUT -i parrot -p tcp -m tcp --dport 22 -j ACCEPT
+
+
+curl -s "http://localhost:4035/get_data_values?format=csv&show_invalid=true"
+curl -s "http://localhost:4035/get_data_values?format=csv&show_invalid=true" >> /tmp/dev.csv
+
+--------
+when you’re connected to panda via USB, run tests/debug_console.py
+
+you can use putch() and puts() in the panda code to print to the debug consolecd
+
+----------------
+curl -G -m 5 -f http://localhost:4070/display_message -d color=foregroundColor --data-urlencode message="THIS IS A SAMPLE MESSAGE" >/dev/null 2>&1
+----------------
+sdv GUI_chargeCurrentRequest 50
+sdv GUI_chargeLimitRequest 90
+
+-GUI_seatHeaterRequestLeft,3
++GUI_seatHeaterRequestLeft,0
+
+cid-updater commands:
+watch
+hostip
+unwatch
+after
+example
+examine
+debug
+verbose
+exit
+gwcmd
+gwver
+apply-bsdiff
+apeb_checkapesig
+restage
+serve
+fwf-redeploy
+fwp-redeploy
+m3-factory-deploy
+m3f-done
+service-redeploy
+signature-redeploy
+setenv
+quickboot
+gwping
+reexec
+respool
+system
+rqflush
+setrlimit
+readsig
+checkkern
+troubsig
+pathkill
+uptime
+termstat
+uinotify
+set_handshake
+uiwarn
+onlinedup
+offlinepatch
+hashpart
+auth
+complete_staging
+phase_car_control
+swap_updater
+sierra_update
+gwconfig
+logfd
+apply-delta
+pingup
+boot-mode
+repair-bootloader
+bootloader-status
+queue_tftp
+override_version
+md5sum
+tuner_report
+ice-ecu-redeploy
+ice-wc-redeploy
+ice-umc-redeploy
+test-bootenv
+test-verify
+checksdcard
+formatsdcard
+wait_for_cluster_esc
+verify_downloaded_esc
+SUICIDE_BOMBER
+KAMIKAZE
+VIOLENT
+PUSHY
+RELENTLESS
+RESILIENT
+PERSISTENT
+YIELDING
+INDIFFERENT
+NEGLIGENT
+SABOTEUR
+
+
+IC_selectedLeftSideWindow,DevReadouts
+IC_selectedRightSideWindow,Energy
+
+Software Reinstall
+
+Correction Code 00020018
+Procedure
+
+1.    Verify that network connectivity is available to the vehicle by the words "3G", "4G", "LTE", or the WiFi icon appearing in the upper right corner of the touchscreen.
+2.    Touch and hold the Tesla logo at the top center of the vehicle touchscreen, until it flares.
+3.    Type "service" into the access code field, and touch OK.
+4.    Touch Controls (vehicle icon), and then touch Service Mode.
+5.    Touch SOFTWARE REINSTALL, and then touch REQUEST.
+6.    Within 15 minutes, the yellow clock icon should appear in the upper right corner of the touchscreen.
+    Note: If the clock icon does not appear within 15 minutes, the vehicle's network connectivity might be unreliable.
+7.     Touch the yellow clock icon, and then touch INSTALL NOW.
+8.     Verify that the software reinstallation was successful.
+        If the reinstallation failed, repeat from step 5.
+        If the reinstallation succeeded, and the reinstallation was performed as one step of another service procedure, return to that procedure.
+        If the reinstallation succeeded, and the reinstallation was performed as a stand-alone procedure, continue to the next step.
+9.    Touch EXIT SERVICE MODE to exit Service Mode.
+
+*/1 * * * * sudo netstat -anp | grep ':44470 ' | grep CLOSE_WAIT | awk '{print $7}' | cut -d \/ -f1 | grep -oE "[[:digit:]]{1,}" | xargs kill
+
+------------
+service-redploy
+
+bms
+cc
+chgph1
+chgph2
+chgvi
+cmp
+cp
+das
+dcdc
+ddm
+dhfd
+dhfp
+dhrd
+dhrp
+di
+dis
+epas
+epb
+epbm
+esp
+gtw
+ibst
+ic
+lft
+msm
+ocs
+park
+parrot
+pdm
+pm
+pms
+ptc
+radc
+rccm
+sccm
+sec
+sierra
+sun
+tas
+tcid
+thc
+tic
+tpms
+tuner
+umc
+ape
+
+command:
+service-redeploy "modules_to_skip":"bms,cc,chgph1,chgph2,chgvi,cmp,cp,das,dcdc,ddm,dhfd,dhfp,dhrd,dhrp,di,dis,epas,epb,epbm,esp,gtw,ibst,ic,lft,msm,ocs,park,parrot,pdm,pm,pms,ptc,radc,rccm,sccm,sec,sierra,sun,tas,tcid,thc,tic,tpms,tuner,umc,ape"
+service-redeploy “modules_to_skip”:“ic,gtw,sierra,ape,tuner”
+rm -rf /var/spool/cid_updater
+/bin/bash /home/bobby/updater-console
+service-redeploy "modules_to_skip":"radc"
+------------
+
+service-redeploy "modules_to_skip":"bms,cc,chgph1,chgph2,chgvi,cmp,cp,das,dcdc,ddm,dhfd,dhfp,dhrd,dhrp,di,dis,epb,epbm,gtw,ibst,ic,lft,msm,ocs,park,parrot,pdm,pm,pms,ptc,radc,rccm,sccm,sec,sierra,sun,tas,tcid,thc,tic,tpms,tuner,umc,ape"
+
+Updating MCU2:
+Download most recent updateable version of Model S MCU2 firmware from lunars
+https://secure.lunars.dev/
+bobby:&AOKo$TN{%uJ
+SSH to afrothunder to download firmware with curl:
+curl https://secure.lunars.dev/firmware/mcu2/*NEW_FIMRWARE_HERE* -u bobby -o www/teslafirmware.img
+
+curl https://secure.lunars.dev/firmware/mcu2/2023.2.11.mcu2 -u bobby:\&AOKo\$TN\{\%uJ -o www/teslafirmware.img
+
+
+SSH to tesla
+
+telnet cid 25956
+install http://www.afrothunder.com/teslafirmware.img
+Will get the response "That file is not being served", totally bogus
+As soon as update downloads and stages, update in app or
+telnet cid 25956
+gostaged
+
+Quick upload to afrothunder:
+curl -s --max-time 15 "ftp://ftp.afrothunder.com/scripts/" -u 'bobby@afrothunder.com:!!QAZ22wsx' -T #filename_here
+
+gwdowngrade
+-----------
+extract the files on your car and do the following to downgrade your gw:
+gwxfer noboot.img gw:noboot.img
+gwxfer release.tgz gw:release.tgz
+gwxfer -delete gw:update.log &>/dev/null
+gwxfer -delete gw:udsdebug.log &>/dev/null
+gwxfer -delete gw:hwidacq.upd &>/dev/null
+printf '\x08noboot.img' | socat - udp:gw:3500
+
+gwxfer gw:internal.dat /tmp/internal.dat
+
+efficiencypackage 1
+
+gwxfer /tmp/internal.dat gw:internal.dat

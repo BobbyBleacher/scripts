@@ -1,0 +1,73 @@
+sudo docker container ls -a
+
+start mosquitto:
+docker run -it -d -p 1883:1883 --name mosquitto eclipse-mosquitto mosquitto -c /mosquitto-no-auth.conf
+
+update home assistant:
+# if this returns "Image is up to date" then you can stop here
+docker pull ghcr.io/home-assistant/raspberrypi4-homeassistant:stable
+
+# stop the running container
+sudo docker stop homeassistant
+
+# remove it from Docker's list of containers
+sudo docker rm homeassistant
+
+# finally, start a new one
+sudo docker run -d \
+  --name homeassistant \
+  --restart=unless-stopped \
+  --privileged \
+  -e TZ="America/Chicago" \
+  -v ~/Docker/homeassistant/config:/config \
+  --network=host \
+  homeassistant/home-assistant
+
+sudo docker run -d --name homeassistant --restart=unless-stopped --privileged -e TZ=America/Chicago -v /home/pi/Docker/homeassistant/config:/config --network=host homeassistant/raspberrypi4-64-homeassistant
+
+curl -XPOST http://localhost:8086/query -u "admin" --data-urlencode "q=CREATE DATABASE hassdb"
+curl -G http://localhost:8086/query -u "admin" --data-urlencode q=SHOW DATABASES
+curl -G http://localhost:8086/query --data-urlencode "q=CREATE USER admin WITH PASSWORD 'zmakqo10' WITH ALL PRIVILEGES"
+
+#influx
+sudo docker run -d \
+  --restart=unless-stopped \
+  -e INFLUXDB_HTTP_AUTH_ENABLED=true \
+  -e INFLUXDB_ADMIN_USER=hass \
+  -e INFLUXDB_ADMIN_PASSWORD=zmakqo10 \
+  -e INFLUXDB_ADMIN_ENABLED=true \
+  -v /var/lib/influxdb:/var/lib/influxdb \
+  -v /etc/influxdb/scripts:/docker-entrypoint-initdb.d \
+  --name influxdb -p 8083:8083 -p 8086:8086 influxdb:1.8
+
+#tasmoadmin
+sudo docker run -d -p 5555:80 -v /home/pi/Docker/TasmoAdmin/data:/data --name=TasmoAdmin --restart=unless-stopped raymondmm/tasmoadmin
+
+#grafana
+sudo docker run -d --name grafana --restart=unless-stopped -e "GF_SECURITY_ALLOW_EMBEDDING=true" -e "GF_AUTH_ANONYMOUS_ENABLED=true" -p 3000:3000 grafana/grafana
+
+#unifi controller
+sudo docker run -d \
+  --restart=unless-stopped \
+  --init \
+  -p 8080:8080 \
+  -p 8443:8443 \
+  -p 3478:3478/udp \
+  -p 10001:10001/udp \
+  -e TZ='America/Chicago' \
+  -v ~/Docker/unifi:/unifi \
+  --user unifi \
+  --name unifi \
+  jacobalberty/unifi
+
+#mosquitto
+sudo docker pull eclipse-mosquitto
+
+sudo docker run -d \
+  --restart=unless-stopped \
+  -p 1883:1883 \
+  -v ~/Docker/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf \
+  -v ~/Docker/mosquitto/log:/mosquitto/log \
+  -v ~/Docker/mosquitto/data:/mosquitto/data \
+  --name mosquitto \
+  eclipse-mosquitto

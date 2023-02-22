@@ -8,7 +8,14 @@ then
   echo "removing old $NAME for $IMAGE"
   sudo docker stop $NAME
   sudo docker rm -f $NAME
-  sudo docker run -d --name homeassistant --restart=unless-stopped --privileged -e TZ=America/Chicago -v /home/pi/Docker/homeassistant/config:/config --network=host homeassistant/home-assistant
+  sudo docker run -d --name homeassistant \
+    --restart=unless-stopped \
+    --privileged \
+    -e TZ=America/Chicago \
+    -v /home/pi/Docker/homeassistant/config:/config \
+    -v /etc/letsencrypt/archive/fwtp.ddns.net:/ssl \
+    --network=host \
+    homeassistant/home-assistant
 else
  echo "No updates found"
 fi

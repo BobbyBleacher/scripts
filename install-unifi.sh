@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sudo mkdir Docker/unifi
+sudo mkdir Docker/unifi/cert
 
 sudo docker run -d \
   --restart=unless-stopped \
@@ -10,7 +11,9 @@ sudo docker run -d \
   -p 3478:3478/udp \
   -p 10001:10001/udp \
   -e TZ='America/Chicago' \
-  -v ~/Docker/unifi:/unifi \
+  -e CERT_IS_CHAIN=true \
+  -v /home/pi/Docker/unifi:/unifi \
+  -v /etc/letsencrypt/archive/fwtp.ddns.net:/unifi/cert \
   --user unifi \
   --name unifi \
   jacobalberty/unifi
